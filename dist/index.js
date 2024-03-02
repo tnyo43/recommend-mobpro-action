@@ -29023,6 +29023,7 @@ async function run() {
         const octokit = (0, github_1.getOctokit)(token);
         const owner = github_1.context.repo.owner;
         const repo = github_1.context.repo.repo;
+        core.debug(`owner: ${owner}, repo: ${repo}, PR #${pullRequest.number}`);
         await octokit.rest.issues.createComment({
             owner,
             repo,

@@ -18,6 +18,8 @@ export async function run(): Promise<void> {
     const owner = context.repo.owner
     const repo = context.repo.repo
 
+    core.debug(`owner: ${owner}, repo: ${repo}, PR #${pullRequest.number}`)
+
     await octokit.rest.issues.createComment({
       owner,
       repo,
