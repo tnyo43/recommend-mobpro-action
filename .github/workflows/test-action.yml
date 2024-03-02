@@ -9,21 +9,24 @@ permissions:
 
 jobs:
   test-action:
-    name: GitHub Actions Test
+    name: GitHub Actions Testa
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
     if: github.event.issue.pull_request
     steps:
-      - name: Get PR branch
-        uses: xt0rted/pull-request-comment-branch@v1
-        id: comment-branch
-
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ steps.comment-branch.outputs.head_ref }}
+
+      - name: Checkout Pull Request
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_URL="${{ github.event.issue.pull_request.url }}"
+          PR_NUM=${PR_URL##*/}
+          echo "Checking out from PR #$PR_NUM based on URL: $PR_URL"
+          hub pr checkout $PR_NUM
 
       - name: Test Local Action
         id: test-action
