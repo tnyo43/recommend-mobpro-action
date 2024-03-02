@@ -9,10 +9,10 @@ branding:
 
 # Define your inputs here.
 inputs:
-  milliseconds:
-    description: 'Your input description here'
+  github_token:
+    description: 'a github access token'
     required: true
-    default: '1000'
+    default: ${{ github.token }}
 
 # Define your outputs here.
 outputs:
