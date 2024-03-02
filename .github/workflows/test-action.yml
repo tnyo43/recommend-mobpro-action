@@ -13,13 +13,14 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
-    if: github.event.issue.pull_request
+    if: github.event_name != 'issue_comment' || github.event.issue.pull_request
     steps:
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
 
       - name: Checkout Pull Request
+        if: github.event.issue.pull_request
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
