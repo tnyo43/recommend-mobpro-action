@@ -25,13 +25,12 @@ export async function run(): Promise<void> {
       repo,
       issue_number: pullRequest.number
     })
-    comments.data.length
 
     await octokit.rest.issues.createComment({
       owner,
       repo,
       issue_number: pullRequest.number,
-      body: `the number of the comments is ${comments.data.length}`
+      body: `the number of the comments is ${comments.data.length}\ncontents: \n${comments.data.map(c => `- ${c.user?.name}, ${c.body}`).join('\n')}`
     })
     core.debug(`Commented on PR #${pullRequest.number}`)
   } catch (error) {
