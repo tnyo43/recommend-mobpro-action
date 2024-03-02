@@ -29024,11 +29024,23 @@ async function run() {
         const owner = github_1.context.repo.owner;
         const repo = github_1.context.repo.repo;
         core.debug(`owner: ${owner}, repo: ${repo}, PR #${pullRequest.number}`);
+        const comments = await octokit.rest.issues.listComments({
+            owner,
+            repo,
+            issue_number: pullRequest.number
+        });
+        const reviewComments = await octokit.rest.pulls.listReviewComments({
+            owner,
+            repo,
+            pull_number: pullRequest.number
+        });
         await octokit.rest.issues.createComment({
             owner,
             repo,
             issue_number: pullRequest.number,
-            body: 'Hello, this is my action!'
+            body: `the number of the comments is ${comments.data.length}\ncontents: \n${comments.data.map(c => `- ${c.user?.name}, ${c.body}`).join('\n')}
+      
+      the number of the review comments is ${reviewComments.data.length}\ncontents: \n${reviewComments.data.map(c => `- ${c.user?.name}, ${c.body}`).join('\n')}`
         });
         core.debug(`Commented on PR #${pullRequest.number}`);
     }
