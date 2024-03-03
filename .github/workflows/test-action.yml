@@ -27,7 +27,7 @@ jobs:
         run: |
           PR_URL="${{ github.event.issue.pull_request.url }}"
           PR_NUM=${PR_URL##*/}
-          ech "pr-number=$PR_NUM" >> "$GITHUB_OUTPUT"
+          echo "pr-number=$PR_NUM" >> "$GITHUB_OUTPUT"
 
       - name: Test Local Action
         id: test-action
