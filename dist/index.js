@@ -29014,35 +29014,36 @@ const github_1 = __nccwpck_require__(5942);
  */
 async function run() {
     try {
-        const pullRequest = github_1.context.payload.pull_request;
-        if (!pullRequest) {
-            core.setFailed('No pull request found.');
+        const prNumber = github_1.context.payload.pull_request?.number ||
+            Number(core.getInput('github_token', { required: false }));
+        if (isNaN(prNumber) || prNumber === 0) {
+            core.setFailed('pr number is not set properly');
             return;
         }
         const token = core.getInput('github_token', { required: true });
         const octokit = (0, github_1.getOctokit)(token);
         const owner = github_1.context.repo.owner;
         const repo = github_1.context.repo.repo;
-        core.debug(`owner: ${owner}, repo: ${repo}, PR #${pullRequest.number}`);
+        core.debug(`owner: ${owner}, repo: ${repo}, PR #${prNumber}`);
         const comments = await octokit.rest.issues.listComments({
             owner,
             repo,
-            issue_number: pullRequest.number
+            issue_number: prNumber
         });
         const reviewComments = await octokit.rest.pulls.listReviewComments({
             owner,
             repo,
-            pull_number: pullRequest.number
+            pull_number: prNumber
         });
         await octokit.rest.issues.createComment({
             owner,
             repo,
-            issue_number: pullRequest.number,
+            issue_number: prNumber,
             body: `the number of the comments is ${comments.data.length}\ncontents: \n${comments.data.map(c => `- ${c.user?.name}, ${c.body}`).join('\n')}
       
       the number of the review comments is ${reviewComments.data.length}\ncontents: \n${reviewComments.data.map(c => `- ${c.user?.name}, ${c.body}`).join('\n')}`
         });
-        core.debug(`Commented on PR #${pullRequest.number}`);
+        core.debug(`Commented on PR #${prNumber}`);
     }
     catch (error) {
         // Fail the workflow run if an error occurs
