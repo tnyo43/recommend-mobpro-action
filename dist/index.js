@@ -29008,6 +29008,18 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const core = __importStar(__nccwpck_require__(9093));
 const github_1 = __nccwpck_require__(5942);
+const uniqueStringArray = (texts) => {
+    if (texts.length === 0)
+        return [];
+    const sorted = texts.sort();
+    const result = [sorted[0]];
+    for (let i = 0; i < sorted.length - 1; i++) {
+        if (sorted[i + 1] !== sorted[i]) {
+            result.push(sorted[i + 1]);
+        }
+    }
+    return result;
+};
 /**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
@@ -29035,14 +29047,19 @@ async function run() {
             repo,
             pull_number: prNumber
         })).data;
+        const userLogins = uniqueStringArray(comments
+            .map(comment => comment.user?.login)
+            .concat(reviewComments.map(comment => comment.user.login))
+            .filter((comment) => !!comment));
         await octokit.rest.issues.createComment({
             owner,
             repo,
             issue_number: prNumber,
-            body: `
+            body: `Hey ${userLogins.map(login => '@' + login).join(', ')}!
 
-the number of the comments is ${comments.length}
-the number of the review comments is ${reviewComments.length}`
+It seems the discussion is dragging on. Perhaps instead of text communication, you could try having a conversation via face-to-face or video call, or even try mob programming?
+
+the number of the comments is ${comments.length} and the review comments is ${reviewComments.length}`
         });
         core.debug(`Commented on PR #${prNumber}`);
     }
