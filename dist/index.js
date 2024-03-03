@@ -29041,12 +29041,12 @@ async function run() {
             owner,
             repo,
             issue_number: prNumber
-        })).data.filter(c => c.user?.type === 'Bot');
+        })).data.filter(c => c.user?.type !== 'Bot');
         const reviewComments = (await octokit.rest.pulls.listReviewComments({
             owner,
             repo,
             pull_number: prNumber
-        })).data;
+        })).data.filter(c => c.user.type !== 'Bot');
         const userLogins = uniqueStringArray(comments
             .map(comment => comment.user?.login)
             .concat(reviewComments.map(comment => comment.user.login))

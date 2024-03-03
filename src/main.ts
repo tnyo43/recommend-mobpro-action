@@ -43,7 +43,7 @@ export async function run(): Promise<void> {
         repo,
         issue_number: prNumber
       })
-    ).data.filter(c => c.user?.type === 'Bot')
+    ).data.filter(c => c.user?.type !== 'Bot')
 
     const reviewComments = (
       await octokit.rest.pulls.listReviewComments({
@@ -51,7 +51,7 @@ export async function run(): Promise<void> {
         repo,
         pull_number: prNumber
       })
-    ).data
+    ).data.filter(c => c.user.type !== 'Bot')
 
     const userLogins = uniqueStringArray(
       comments
