@@ -9,7 +9,7 @@ export async function run(): Promise<void> {
   try {
     const prNumber =
       context.payload.pull_request?.number ||
-      Number(core.getInput('github_token', { required: false }))
+      Number(core.getInput('pr_number', { required: false }))
     if (isNaN(prNumber) || prNumber === 0) {
       core.setFailed('pr number is not set properly')
       return
