@@ -42,9 +42,10 @@ export async function run(): Promise<void> {
       owner,
       repo,
       issue_number: prNumber,
-      body: `the number of the comments is ${comments.length}\n
+      body: `
 
-      the number of the review comments is ${reviewComments.length}\n`
+the number of the comments is ${comments.length}
+the number of the review comments is ${reviewComments.length}`
     })
     core.debug(`Commented on PR #${prNumber}`)
   } catch (error) {
