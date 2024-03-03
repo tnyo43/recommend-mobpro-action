@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import { getOctokit, context } from '@actions/github'
 
-const uniqueStringArray = (texts: string[]) => {
+const uniqueStringArray = (texts: string[]): string[] => {
   if (texts.length === 0) return []
 
   const sorted = texts.sort()
