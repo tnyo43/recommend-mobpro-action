@@ -29050,12 +29050,12 @@ async function run() {
         const userLogins = uniqueStringArray(comments
             .map(comment => comment.user?.login)
             .concat(reviewComments.map(comment => comment.user.login))
-            .filter((comment) => !!comment));
+            .filter((comment) => !!comment)).map(login => `@${login}`);
         await octokit.rest.issues.createComment({
             owner,
             repo,
             issue_number: prNumber,
-            body: `Hey ${userLogins.map(login => '@' + login).join(', ')}!
+            body: `Hey ${userLogins.join(', ')}!
 
 It seems the discussion is dragging on. Perhaps instead of text communication, you could try having a conversation via face-to-face or video call, or even try mob programming?
 
