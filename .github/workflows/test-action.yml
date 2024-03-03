@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Checkout Pull Request
-        # if: github.event.issue.pull_request
+        if: github.event.issue.pull_request
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
