@@ -1,0 +1,40 @@
+on:
+  pull_request_review_comment:
+    types: [created]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+jobs:
+  test-action:
+    name: GitHub Actions Test
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    if: github.event_name != 'issue_comment' || github.event.issue.pull_request
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Get PR_NUMBER for issue_comment triggered events
+        id: get-pr-number
+        if: github.event.issue.pull_request
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_URL="${{ github.event.issue.pull_request.url }}"
+          PR_NUM=${PR_URL##*/}
+          echo "pr-number=$PR_NUM" >> "$GITHUB_OUTPUT"
+
+      - name: Test Local Action
+        id: test-action
+        uses: ./
+        with:
+          pr_number: ${{ steps.get-pr-number.outputs.pr-number }}
+
+      - name: Print Output
+        id: output
+        run: echo "${{ steps.test-action.outputs.time }}"

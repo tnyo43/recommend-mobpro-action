@@ -20,12 +20,13 @@
   "exports": {
     ".": "./dist/index.js"
   },
+  "packageManager": "pnpm@8.15.4",
   "engines": {
-    "node": ">=20"
+    "node": "20.11.0",
+    "pnpm": "8.15.4"
   },
   "scripts": {
     "bundle": "npm run format:write && npm run package",
-    "ci-test": "jest",
     "coverage": "make-coverage-badge --output-path ./badges/coverage.svg",
     "format:write": "prettier --write **/*.ts",
     "format:check": "prettier --check **/*.ts",
@@ -66,7 +67,8 @@
     ]
   },
   "dependencies": {
-    "@actions/core": "^1.10.1"
+    "@actions/core": "^1.10.1",
+    "@actions/github": "^6.0.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",

@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import { wait } from './wait'
+import { getOctokit, context } from '@actions/github'
 
 /**
  * The main function for the action.
@@ -7,18 +7,47 @@ import { wait } from './wait'
  */
 export async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
+    const prNumber =
+      context.payload.pull_request?.number ||
+      Number(core.getInput('pr_number', { required: false }))
+    if (isNaN(prNumber) || prNumber === 0) {
+      core.setFailed('pr number is not set properly')
+      return
+    }
 
-    // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-    core.debug(`Waiting ${ms} milliseconds ...`)
+    const token = core.getInput('github_token', { required: true })
+    const octokit = getOctokit(token)
+    const owner = context.repo.owner
+    const repo = context.repo.repo
 
-    // Log the current timestamp, wait, then log the new timestamp
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
+    core.debug(`owner: ${owner}, repo: ${repo}, PR #${prNumber}`)
 
-    // Set outputs for other workflow steps to use
-    core.setOutput('time', new Date().toTimeString())
+    const comments = (
+      await octokit.rest.issues.listComments({
+        owner,
+        repo,
+        issue_number: prNumber
+      })
+    ).data.filter(c => c.user?.type === 'Bot')
+
+    const reviewComments = (
+      await octokit.rest.pulls.listReviewComments({
+        owner,
+        repo,
+        pull_number: prNumber
+      })
+    ).data
+
+    await octokit.rest.issues.createComment({
+      owner,
+      repo,
+      issue_number: prNumber,
+      body: `
+
+the number of the comments is ${comments.length}
+the number of the review comments is ${reviewComments.length}`
+    })
+    core.debug(`Commented on PR #${prNumber}`)
   } catch (error) {
     // Fail the workflow run if an error occurs
     if (error instanceof Error) core.setFailed(error.message)
