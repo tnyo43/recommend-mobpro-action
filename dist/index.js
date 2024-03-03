@@ -29029,7 +29029,7 @@ async function run() {
             owner,
             repo,
             issue_number: prNumber
-        })).data.filter(c => c.user?.login === 'github-actions[bot]');
+        })).data.filter(c => c.user?.type === 'Bot');
         const reviewComments = (await octokit.rest.pulls.listReviewComments({
             owner,
             repo,
