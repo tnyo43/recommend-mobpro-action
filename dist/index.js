@@ -29029,7 +29029,7 @@ async function run() {
             owner,
             repo,
             issue_number: prNumber
-        })).data;
+        })).data.filter(c => c.user?.login === 'github-actions[bot]');
         const reviewComments = (await octokit.rest.pulls.listReviewComments({
             owner,
             repo,
@@ -29039,9 +29039,9 @@ async function run() {
             owner,
             repo,
             issue_number: prNumber,
-            body: `the number of the comments is ${comments.length}\ncontents: \n${comments.map(c => `- ${JSON.stringify(c.user)}, ${c.body}`).join('\n')}
+            body: `the number of the comments is ${comments.length}\n
 
-      the number of the review comments is ${reviewComments.length}\ncontents: \n${reviewComments.map(c => `- ${JSON.stringify(c.user)}, ${c.body}`).join('\n')}`
+      the number of the review comments is ${reviewComments.length}\n`
         });
         core.debug(`Commented on PR #${prNumber}`);
     }
