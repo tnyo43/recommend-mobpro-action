@@ -7,9 +7,11 @@ import { getOctokit, context } from '@actions/github'
  */
 export async function run(): Promise<void> {
   try {
-    const pullRequest = context.payload.pull_request
-    if (!pullRequest) {
-      core.setFailed('No pull request found.')
+    const prNumber =
+      context.payload.pull_request?.number ||
+      Number(core.getInput('github_token', { required: false }))
+    if (isNaN(prNumber) || prNumber === 0) {
+      core.setFailed('pr number is not set properly')
       return
     }
 
@@ -18,28 +20,28 @@ export async function run(): Promise<void> {
     const owner = context.repo.owner
     const repo = context.repo.repo
 
-    core.debug(`owner: ${owner}, repo: ${repo}, PR #${pullRequest.number}`)
+    core.debug(`owner: ${owner}, repo: ${repo}, PR #${prNumber}`)
 
     const comments = await octokit.rest.issues.listComments({
       owner,
       repo,
-      issue_number: pullRequest.number
+      issue_number: prNumber
     })
     const reviewComments = await octokit.rest.pulls.listReviewComments({
       owner,
       repo,
-      pull_number: pullRequest.number
+      pull_number: prNumber
     })
 
     await octokit.rest.issues.createComment({
       owner,
       repo,
-      issue_number: pullRequest.number,
+      issue_number: prNumber,
       body: `the number of the comments is ${comments.data.length}\ncontents: \n${comments.data.map(c => `- ${c.user?.name}, ${c.body}`).join('\n')}
       
       the number of the review comments is ${reviewComments.data.length}\ncontents: \n${reviewComments.data.map(c => `- ${c.user?.name}, ${c.body}`).join('\n')}`
     })
-    core.debug(`Commented on PR #${pullRequest.number}`)
+    core.debug(`Commented on PR #${prNumber}`)
   } catch (error) {
     // Fail the workflow run if an error occurs
     if (error instanceof Error) core.setFailed(error.message)

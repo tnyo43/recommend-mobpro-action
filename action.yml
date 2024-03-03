@@ -13,6 +13,10 @@ inputs:
     description: 'a github access token'
     required: true
     default: ${{ github.token }}
+  pr_number:
+    description:
+      'a target pr number. This is set for events triggered by issue_comment'
+    required: false
 
 # Define your outputs here.
 outputs:
