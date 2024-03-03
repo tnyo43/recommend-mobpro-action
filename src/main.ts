@@ -1,6 +1,21 @@
 import * as core from '@actions/core'
 import { getOctokit, context } from '@actions/github'
 
+const uniqueStringArray = (texts: string[]) => {
+  if (texts.length === 0) return []
+
+  const sorted = texts.sort()
+  const result = [sorted[0]]
+
+  for (let i = 0; i < sorted.length - 1; i++) {
+    if (sorted[i + 1] !== sorted[i]) {
+      result.push(sorted[i + 1])
+    }
+  }
+
+  return result
+}
+
 /**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
@@ -37,6 +52,13 @@ export async function run(): Promise<void> {
         pull_number: prNumber
       })
     ).data
+
+    const userLogins = uniqueStringArray(
+      comments
+        .map(comment => comment.user?.login)
+        .concat(reviewComments.map(comment => comment.user.login))
+        .filter((comment): comment is string => !!comment)
+    )
 
     await octokit.rest.issues.createComment({
       owner,
