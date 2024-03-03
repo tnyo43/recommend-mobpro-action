@@ -64,10 +64,11 @@ export async function run(): Promise<void> {
       owner,
       repo,
       issue_number: prNumber,
-      body: `
+      body: `Hey ${userLogins.map(login => '@' + login).join(', ')}!
 
-the number of the comments is ${comments.length}
-the number of the review comments is ${reviewComments.length}`
+It seems the discussion is dragging on. Perhaps instead of text communication, you could try having a conversation via face-to-face or video call, or even try mob programming?
+
+the number of the comments is ${comments.length} and the review comments is ${reviewComments.length}`
     })
     core.debug(`Commented on PR #${prNumber}`)
   } catch (error) {
