@@ -38,6 +38,7 @@ jobs:
         uses: ./
         with:
           pr_number: ${{ steps.get-pr-number.outputs.pr-number }}
+          threshold: 4
 
       - name: Print Output
         id: output

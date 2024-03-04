@@ -22,7 +22,7 @@ inputs:
       'a threshold at which a message is sent when the number of comments
       exceeds this'
     required: true
-    default: 4
+    default: 25
 
 # Define your outputs here.
 outputs:
