@@ -60,7 +60,10 @@ export async function run(): Promise<void> {
     )
     const threshold = Number(core.getInput('threshold', { required: true }))
     const commentCount = comments.length + reviewComments.length
-    if (commentCount < threshold || hasMessageSent) {
+    if (commentCount < threshold) {
+      return
+    }
+    if (hasMessageSent) {
       core.debug('a message has been sent')
       return
     }
@@ -80,7 +83,8 @@ export async function run(): Promise<void> {
 
 It seems the discussion is dragging on. Perhaps instead of text communication, you could try having a conversation via face-to-face or video call, or even try mob programming?
 
-the number of the comments is ${comments.length} and the review comments is ${reviewComments.length}`
+the number of the comments is ${comments.length} and the review comments is ${reviewComments.length}
+threshold: ${threshold}, commentCount: ${commentCount}`
     })
     core.debug(`Commented on PR #${prNumber}`)
   } catch (error) {
