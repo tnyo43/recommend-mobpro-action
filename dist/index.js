@@ -29047,6 +29047,17 @@ async function run() {
             repo,
             pull_number: prNumber
         })).data.filter(c => c.user.type !== 'Bot');
+        const hasMessageSent = comments.some(comment => comment.user?.type === 'Bot' &&
+            comment.body?.includes('It seems the discussion is dragging on.'));
+        const threshold = Number(core.getInput('threshold', { required: true }));
+        const commentCount = comments.length + reviewComments.length;
+        if (commentCount < threshold) {
+            return;
+        }
+        if (hasMessageSent) {
+            core.debug('a message has been sent');
+            return;
+        }
         const userLogins = uniqueStringArray(comments
             .map(comment => comment.user?.login)
             .concat(reviewComments.map(comment => comment.user.login))
@@ -29059,7 +29070,8 @@ async function run() {
 
 It seems the discussion is dragging on. Perhaps instead of text communication, you could try having a conversation via face-to-face or video call, or even try mob programming?
 
-the number of the comments is ${comments.length} and the review comments is ${reviewComments.length}`
+the number of the comments is ${comments.length} and the review comments is ${reviewComments.length}
+threshold: ${threshold}, commentCount: ${commentCount}`
         });
         core.debug(`Commented on PR #${prNumber}`);
     }
