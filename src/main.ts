@@ -53,6 +53,18 @@ export async function run(): Promise<void> {
       })
     ).data.filter(c => c.user.type !== 'Bot')
 
+    const hasMessageSent = comments.some(
+      comment =>
+        comment.user?.type === 'Bot' &&
+        comment.body?.includes('It seems the discussion is dragging on.')
+    )
+    const threshold = Number(core.getInput('threshold', { required: true }))
+    const commentCount = comments.length + reviewComments.length
+    if (commentCount < threshold || hasMessageSent) {
+      core.debug('a message has been sent')
+      return
+    }
+
     const userLogins = uniqueStringArray(
       comments
         .map(comment => comment.user?.login)
