@@ -4,6 +4,7 @@ import { context } from '@actions/github'
 type Option = {
   token: string
   prNumber: number
+  threshold: number
 }
 
 function getPrNumber(): number {
@@ -24,8 +25,11 @@ export function getOption(): Option {
     setFailed('pr number is not set properly')
   }
 
+  const threshold = Number(getInput('threshold', { required: true }))
+
   return {
     token,
-    prNumber
+    prNumber,
+    threshold
   }
 }

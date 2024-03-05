@@ -29027,7 +29027,7 @@ const uniqueStringArray = (texts) => {
  */
 async function run() {
     try {
-        const { token, prNumber } = (0, option_1.getOption)();
+        const { token, prNumber, threshold } = (0, option_1.getOption)();
         const octokit = (0, github_1.getOctokit)(token);
         const owner = github_1.context.repo.owner;
         const repo = github_1.context.repo.repo;
@@ -29043,7 +29043,6 @@ async function run() {
             pull_number: prNumber
         })).data.filter(c => c.user.type !== 'Bot');
         const hasMessageSent = comments.some(comment => comment.body?.includes('It seems the discussion is dragging on.'));
-        const threshold = Number(core.getInput('threshold', { required: true }));
         const commentCount = comments.length + reviewComments.length;
         if (commentCount < threshold) {
             return;
@@ -29103,9 +29102,11 @@ function getOption() {
     if (isNaN(prNumber) || prNumber === 0) {
         (0, core_1.setFailed)('pr number is not set properly');
     }
+    const threshold = Number((0, core_1.getInput)('threshold', { required: true }));
     return {
         token,
-        prNumber
+        prNumber,
+        threshold
     };
 }
 exports.getOption = getOption;

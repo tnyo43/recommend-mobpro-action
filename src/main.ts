@@ -23,7 +23,7 @@ const uniqueStringArray = (texts: string[]): string[] => {
  */
 export async function run(): Promise<void> {
   try {
-    const { token, prNumber } = getOption()
+    const { token, prNumber, threshold } = getOption()
 
     const octokit = getOctokit(token)
     const owner = context.repo.owner
@@ -50,7 +50,6 @@ export async function run(): Promise<void> {
     const hasMessageSent = comments.some(comment =>
       comment.body?.includes('It seems the discussion is dragging on.')
     )
-    const threshold = Number(core.getInput('threshold', { required: true }))
     const commentCount = comments.length + reviewComments.length
     if (commentCount < threshold) {
       return
