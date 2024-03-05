@@ -19,21 +19,9 @@ jobs:
         id: checkout
         uses: actions/checkout@v4
 
-      - name: Get PR_NUMBER for issue_comment triggered events
-        id: get-pr-number
-        if: github.event.issue.pull_request
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          PR_URL="${{ github.event.issue.pull_request.url }}"
-          PR_NUM=${PR_URL##*/}
-          echo "pr-number=$PR_NUM" >> "$GITHUB_OUTPUT"
-
       - name: Test Local Action
         id: test-action
         uses: ./
-        with:
-          pr_number: ${{ steps.get-pr-number.outputs.pr-number }}
 
       - name: Print Output
         id: output
