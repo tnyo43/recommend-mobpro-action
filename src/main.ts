@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
 import { getOctokit, context } from '@actions/github'
+import { getOption } from './option'
 
 const uniqueStringArray = (texts: string[]): string[] => {
   if (texts.length === 0) return []
@@ -22,15 +23,8 @@ const uniqueStringArray = (texts: string[]): string[] => {
  */
 export async function run(): Promise<void> {
   try {
-    const prNumber =
-      context.payload.pull_request?.number ||
-      Number(core.getInput('pr_number', { required: false }))
-    if (isNaN(prNumber) || prNumber === 0) {
-      core.setFailed('pr number is not set properly')
-      return
-    }
+    const { token, prNumber } = getOption()
 
-    const token = core.getInput('github_token', { required: true })
     const octokit = getOctokit(token)
     const owner = context.repo.owner
     const repo = context.repo.repo

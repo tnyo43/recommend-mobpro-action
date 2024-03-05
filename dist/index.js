@@ -29008,6 +29008,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const core = __importStar(__nccwpck_require__(9093));
 const github_1 = __nccwpck_require__(5942);
+const option_1 = __nccwpck_require__(6335);
 const uniqueStringArray = (texts) => {
     if (texts.length === 0)
         return [];
@@ -29026,13 +29027,7 @@ const uniqueStringArray = (texts) => {
  */
 async function run() {
     try {
-        const prNumber = github_1.context.payload.pull_request?.number ||
-            Number(core.getInput('pr_number', { required: false }));
-        if (isNaN(prNumber) || prNumber === 0) {
-            core.setFailed('pr number is not set properly');
-            return;
-        }
-        const token = core.getInput('github_token', { required: true });
+        const { token, prNumber } = (0, option_1.getOption)();
         const octokit = (0, github_1.getOctokit)(token);
         const owner = github_1.context.repo.owner;
         const repo = github_1.context.repo.repo;
@@ -29081,6 +29076,39 @@ threshold: ${threshold}, commentCount: ${commentCount}`
     }
 }
 exports.run = run;
+
+
+/***/ }),
+
+/***/ 6335:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getOption = void 0;
+const core_1 = __nccwpck_require__(9093);
+const github_1 = __nccwpck_require__(5942);
+function getPrNumber() {
+    if (typeof github_1.context.payload.pull_request?.number === 'number') {
+        return github_1.context.payload.pull_request.number;
+    }
+    const url = (0, core_1.getInput)('pr_url', { required: false });
+    const numberFromUrl = Number(url.substring(url.lastIndexOf('/') + 1));
+    return numberFromUrl;
+}
+function getOption() {
+    const token = (0, core_1.getInput)('github_token', { required: true });
+    const prNumber = getPrNumber();
+    if (isNaN(prNumber) || prNumber === 0) {
+        (0, core_1.setFailed)('pr number is not set properly');
+    }
+    return {
+        token,
+        prNumber
+    };
+}
+exports.getOption = getOption;
 
 
 /***/ }),
