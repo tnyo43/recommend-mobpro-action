@@ -6,7 +6,7 @@ type Option = {
   prNumber: number
 }
 
-function getPrNumber() {
+function getPrNumber(): number {
   if (typeof context.payload.pull_request?.number === 'number') {
     return context.payload.pull_request.number
   }
