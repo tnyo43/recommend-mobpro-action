@@ -23,7 +23,7 @@ const uniqueStringArray = (texts: string[]): string[] => {
  */
 export async function run(): Promise<void> {
   try {
-    const { token, prNumber } = getOption()
+    const { token, prNumber, threshold } = getOption()
 
     const octokit = getOctokit(token)
     const owner = context.repo.owner
@@ -47,6 +47,18 @@ export async function run(): Promise<void> {
       })
     ).data.filter(c => c.user.type !== 'Bot')
 
+    const hasMessageSent = comments.some(comment =>
+      comment.body?.includes('It seems the discussion is dragging on.')
+    )
+    const commentCount = comments.length + reviewComments.length
+    if (commentCount < threshold) {
+      return
+    }
+    if (hasMessageSent) {
+      core.debug('a message has been sent')
+      return
+    }
+
     const userLogins = uniqueStringArray(
       comments
         .map(comment => comment.user?.login)
@@ -62,7 +74,8 @@ export async function run(): Promise<void> {
 
 It seems the discussion is dragging on. Perhaps instead of text communication, you could try having a conversation via face-to-face or video call, or even try mob programming?
 
-the number of the comments is ${comments.length} and the review comments is ${reviewComments.length}`
+the number of the comments is ${comments.length} and the review comments is ${reviewComments.length}
+threshold: ${threshold}, commentCount: ${commentCount}`
     })
     core.debug(`Commented on PR #${prNumber}`)
   } catch (error) {

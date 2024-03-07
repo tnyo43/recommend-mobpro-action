@@ -4,6 +4,10 @@ on:
   issue_comment:
     types: [created]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -22,6 +26,8 @@ jobs:
       - name: Test Local Action
         id: test-action
         uses: ./
+        with:
+          threshold: 4
 
       - name: Print Output
         id: output

@@ -29027,7 +29027,7 @@ const uniqueStringArray = (texts) => {
  */
 async function run() {
     try {
-        const { token, prNumber } = (0, option_1.getOption)();
+        const { token, prNumber, threshold } = (0, option_1.getOption)();
         const octokit = (0, github_1.getOctokit)(token);
         const owner = github_1.context.repo.owner;
         const repo = github_1.context.repo.repo;
@@ -29042,6 +29042,15 @@ async function run() {
             repo,
             pull_number: prNumber
         })).data.filter(c => c.user.type !== 'Bot');
+        const hasMessageSent = comments.some(comment => comment.body?.includes('It seems the discussion is dragging on.'));
+        const commentCount = comments.length + reviewComments.length;
+        if (commentCount < threshold) {
+            return;
+        }
+        if (hasMessageSent) {
+            core.debug('a message has been sent');
+            return;
+        }
         const userLogins = uniqueStringArray(comments
             .map(comment => comment.user?.login)
             .concat(reviewComments.map(comment => comment.user.login))
@@ -29054,7 +29063,8 @@ async function run() {
 
 It seems the discussion is dragging on. Perhaps instead of text communication, you could try having a conversation via face-to-face or video call, or even try mob programming?
 
-the number of the comments is ${comments.length} and the review comments is ${reviewComments.length}`
+the number of the comments is ${comments.length} and the review comments is ${reviewComments.length}
+threshold: ${threshold}, commentCount: ${commentCount}`
         });
         core.debug(`Commented on PR #${prNumber}`);
     }
@@ -29092,9 +29102,11 @@ function getOption() {
     if (isNaN(prNumber) || prNumber === 0) {
         (0, core_1.setFailed)('pr number is not set properly');
     }
+    const threshold = Number((0, core_1.getInput)('threshold', { required: true }));
     return {
         token,
-        prNumber
+        prNumber,
+        threshold
     };
 }
 exports.getOption = getOption;

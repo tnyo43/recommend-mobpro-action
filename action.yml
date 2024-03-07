@@ -19,6 +19,12 @@ inputs:
       triggered by "issue_comment" event'
     required: true
     default: ${{ github.event.issue.pull_request.url }}
+  threshold:
+    description:
+      'a threshold at which a message is sent when the number of comments
+      exceeds this'
+    required: true
+    default: 25
 
 # Define your outputs here.
 outputs:
