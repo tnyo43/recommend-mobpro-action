@@ -1,5 +1,5 @@
 import { type Octokit } from 'octokit'
-import { type User } from './types'
+import { CommentContent, type User } from './types'
 import { getLoginNames } from './getLoginNames'
 import { isAlreadyCommented } from './isAlreadyCommented'
 
@@ -13,7 +13,7 @@ type Args = {
 export async function getCommentContent(
   octokit: Octokit,
   args: Args
-): Promise<string[] | null> {
+): Promise<CommentContent | null> {
   const { owner, repo, prNumber } = args
 
   const comments = (
@@ -36,7 +36,8 @@ export async function getCommentContent(
     })
   ).data
 
-  if (comments.length + reviewComments.length < args.threshold) {
+  const numberOfComments = comments.length + reviewComments.length
+  if (numberOfComments < args.threshold) {
     return null
   }
 
@@ -48,5 +49,10 @@ export async function getCommentContent(
     .filter((user): user is Exclude<typeof user, null> => user !== null)
 
   const logins = getLoginNames(users1.concat(users2))
-  return logins
+
+  return {
+    logins,
+    numberOfComments,
+    threshold: args.threshold
+  }
 }

@@ -10,3 +10,10 @@ export type Comment = {
   user: User | null
   body?: string
 }
+
+export type CommentContent = {
+  logins: string[]
+
+  numberOfComments: number
+  threshold: number
+}
