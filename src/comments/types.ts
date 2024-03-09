@@ -5,3 +5,8 @@ export type User = {
   // type of user: "User" or "Bot"
   type: string
 }
+
+export type Comment = {
+  user: User | null
+  body?: string
+}
