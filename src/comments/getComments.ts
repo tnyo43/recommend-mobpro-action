@@ -1,14 +1,19 @@
 import { type Octokit } from 'octokit'
 import { type User } from './types'
 import { getLoginNames } from './getLoginNames'
+import { isAlreadyCommented } from './isAlreadyCommented'
 
 type Args = {
   owner: string
   repo: string
   prNumber: number
+  threshold: number
 }
 
-export async function getComments(octokit: Octokit, args: Args) {
+export async function getCommentContent(
+  octokit: Octokit,
+  args: Args
+): Promise<string[] | null> {
   const { owner, repo, prNumber } = args
 
   const comments = (
@@ -18,6 +23,11 @@ export async function getComments(octokit: Octokit, args: Args) {
       issue_number: prNumber
     })
   ).data
+
+  if (isAlreadyCommented(comments)) {
+    return null
+  }
+
   const reviewComments = (
     await octokit.rest.pulls.listReviewComments({
       owner,
@@ -25,6 +35,10 @@ export async function getComments(octokit: Octokit, args: Args) {
       pull_number: prNumber
     })
   ).data
+
+  if (comments.length + reviewComments.length < args.threshold) {
+    return null
+  }
 
   const users1: User[] = comments
     .map(comment => comment.user)
@@ -34,4 +48,5 @@ export async function getComments(octokit: Octokit, args: Args) {
     .filter((user): user is Exclude<typeof user, null> => user !== null)
 
   const logins = getLoginNames(users1.concat(users2))
+  return logins
 }
