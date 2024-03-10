@@ -29035,14 +29035,14 @@ async function run() {
         const comments = (await octokit.rest.issues.listComments({
             owner,
             repo,
-            issue_number: prNumber
-        })).data.filter(c => c.user?.type !== 'Bot');
+            issue_number: prNumber,
+        })).data.filter((c) => c.user?.type !== 'Bot');
         const reviewComments = (await octokit.rest.pulls.listReviewComments({
             owner,
             repo,
-            pull_number: prNumber
-        })).data.filter(c => c.user.type !== 'Bot');
-        const hasMessageSent = comments.some(comment => comment.body?.includes('It seems the discussion is dragging on.'));
+            pull_number: prNumber,
+        })).data.filter((c) => c.user.type !== 'Bot');
+        const hasMessageSent = comments.some((comment) => comment.body?.includes('It seems the discussion is dragging on.'));
         const commentCount = comments.length + reviewComments.length;
         if (commentCount < threshold) {
             return;
@@ -29052,9 +29052,9 @@ async function run() {
             return;
         }
         const userLogins = uniqueStringArray(comments
-            .map(comment => comment.user?.login)
-            .concat(reviewComments.map(comment => comment.user.login))
-            .filter((comment) => !!comment)).map(login => `@${login}`);
+            .map((comment) => comment.user?.login)
+            .concat(reviewComments.map((comment) => comment.user.login))
+            .filter((comment) => !!comment)).map((login) => `@${login}`);
         await octokit.rest.issues.createComment({
             owner,
             repo,
@@ -29064,7 +29064,7 @@ async function run() {
 It seems the discussion is dragging on. Perhaps instead of text communication, you could try having a conversation via face-to-face or video call, or even try mob programming?
 
 the number of the comments is ${comments.length} and the review comments is ${reviewComments.length}
-threshold: ${threshold}, commentCount: ${commentCount}`
+threshold: ${threshold}, commentCount: ${commentCount}`,
         });
         core.debug(`Commented on PR #${prNumber}`);
     }
@@ -29106,7 +29106,7 @@ function getOption() {
     return {
         token,
         prNumber,
-        threshold
+        threshold,
     };
 }
 exports.getOption = getOption;
