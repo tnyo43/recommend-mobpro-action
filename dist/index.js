@@ -28976,7 +28976,7 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 435:
+/***/ 1435:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -28988,7 +28988,7 @@ exports.ACTION_IDENTIFY_TEXT = '<!-- a sentence for identifying bot recommend-mo
 
 /***/ }),
 
-/***/ 69:
+/***/ 4069:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -28996,7 +28996,7 @@ exports.ACTION_IDENTIFY_TEXT = '<!-- a sentence for identifying bot recommend-mo
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getCommentContent = void 0;
 const getLoginNames_1 = __nccwpck_require__(40);
-const isAlreadyCommented_1 = __nccwpck_require__(484);
+const isAlreadyCommented_1 = __nccwpck_require__(8484);
 async function getCommentContent(octokit, octokitContext, args) {
     const { owner, repo, prNumber } = octokitContext;
     const comments = (await octokit.rest.issues.listComments({
@@ -29064,14 +29064,14 @@ exports.getLoginNames = getLoginNames;
 
 /***/ }),
 
-/***/ 484:
+/***/ 8484:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.isAlreadyCommented = void 0;
-const constants_1 = __nccwpck_require__(435);
+const constants_1 = __nccwpck_require__(1435);
 function isAlreadyCommented(comments) {
     return comments.some((comment) => comment.body?.startsWith(constants_1.ACTION_IDENTIFY_TEXT));
 }
@@ -29080,14 +29080,14 @@ exports.isAlreadyCommented = isAlreadyCommented;
 
 /***/ }),
 
-/***/ 942:
+/***/ 7942:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.postComment = void 0;
-const constants_1 = __nccwpck_require__(435);
+const constants_1 = __nccwpck_require__(1435);
 function MainText(content) {
     return `
 Hey ${content.logins.join(', ')}!
@@ -29159,8 +29159,8 @@ exports.run = void 0;
 const core = __importStar(__nccwpck_require__(9093));
 const github_1 = __nccwpck_require__(5942);
 const option_1 = __nccwpck_require__(6335);
-const getCommentContent_1 = __nccwpck_require__(69);
-const postComment_1 = __nccwpck_require__(942);
+const getCommentContent_1 = __nccwpck_require__(4069);
+const postComment_1 = __nccwpck_require__(7942);
 /**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
