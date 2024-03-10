@@ -7,7 +7,7 @@ import {
 
 function MainText(content: CommentContent) {
   return `
-Hey ${content.logins.join(', ')}!
+Hey ${content.logins.map((login) => '@' + login).join(', ')}!
 
 It seems the discussion is dragging on. Perhaps instead of text communication, you could try having a conversation via face-to-face or video call, or even try mob programming?
 `;
