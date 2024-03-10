@@ -29055,8 +29055,8 @@ function uniqueStringArray(texts) {
 }
 function getLoginNames(users) {
     const loginNameArray = users
-        .filter(user => user.type === 'User')
-        .map(user => user.login);
+        .filter((user) => user.type === 'User')
+        .map((user) => user.login);
     return uniqueStringArray(loginNameArray);
 }
 exports.getLoginNames = getLoginNames;
@@ -29073,7 +29073,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.isAlreadyCommented = void 0;
 const constants_1 = __nccwpck_require__(435);
 function isAlreadyCommented(comments) {
-    return comments.some(comment => comment.body?.startsWith(constants_1.ACTION_IDENTIFY_TEXT));
+    return comments.some((comment) => comment.body?.startsWith(constants_1.ACTION_IDENTIFY_TEXT));
 }
 exports.isAlreadyCommented = isAlreadyCommented;
 
@@ -29118,7 +29118,7 @@ async function postComment(octokit, octokitContext, content) {
         owner,
         repo,
         issue_number: prNumber,
-        body: getText(content)
+        body: getText(content),
     });
 }
 exports.postComment = postComment;
