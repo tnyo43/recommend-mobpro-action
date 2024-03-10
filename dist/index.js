@@ -29002,7 +29002,7 @@ async function getCommentContent(octokit, octokitContext, args) {
     const comments = (await octokit.rest.issues.listComments({
         owner,
         repo,
-        issue_number: prNumber
+        issue_number: prNumber,
     })).data;
     if ((0, isAlreadyCommented_1.isAlreadyCommented)(comments)) {
         return null;
@@ -29010,23 +29010,23 @@ async function getCommentContent(octokit, octokitContext, args) {
     const reviewComments = (await octokit.rest.pulls.listReviewComments({
         owner,
         repo,
-        pull_number: prNumber
+        pull_number: prNumber,
     })).data;
     const numberOfComments = comments.length + reviewComments.length;
     if (numberOfComments < args.threshold) {
         return null;
     }
     const users1 = comments
-        .map(comment => comment.user)
+        .map((comment) => comment.user)
         .filter((user) => user !== null);
     const users2 = reviewComments
-        .map(comment => comment.user)
+        .map((comment) => comment.user)
         .filter((user) => user !== null);
     const logins = (0, getLoginNames_1.getLoginNames)(users1.concat(users2));
     return {
         logins,
         numberOfComments,
-        threshold: args.threshold
+        threshold: args.threshold,
     };
 }
 exports.getCommentContent = getCommentContent;
@@ -29174,11 +29174,11 @@ async function run() {
         const octokitContext = {
             owner: github_1.context.repo.owner,
             repo: github_1.context.repo.repo,
-            prNumber
+            prNumber,
         };
         core.debug(`owner: ${owner}, repo: ${repo}, PR #${prNumber}`);
         const commentContent = await (0, getCommentContent_1.getCommentContent)(octokit, octokitContext, {
-            threshold
+            threshold,
         });
         if (commentContent) {
             await (0, postComment_1.postComment)(octokit, octokitContext, commentContent);
@@ -29222,7 +29222,7 @@ function getOption() {
     return {
         token,
         prNumber,
-        threshold
+        threshold,
     };
 }
 exports.getOption = getOption;
