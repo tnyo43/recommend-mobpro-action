@@ -28976,6 +28976,156 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 1435:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ACTION_IDENTIFY_TEXT = void 0;
+exports.ACTION_IDENTIFY_TEXT = '<!-- a sentence for identifying bot recommend-mobpro-action -->';
+
+
+/***/ }),
+
+/***/ 4069:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getCommentContent = void 0;
+const getLoginNames_1 = __nccwpck_require__(40);
+const isAlreadyCommented_1 = __nccwpck_require__(8484);
+async function getCommentContent(octokit, octokitContext, args) {
+    const { owner, repo, prNumber } = octokitContext;
+    const comments = (await octokit.rest.issues.listComments({
+        owner,
+        repo,
+        issue_number: prNumber,
+    })).data;
+    if ((0, isAlreadyCommented_1.isAlreadyCommented)(comments)) {
+        return null;
+    }
+    const reviewComments = (await octokit.rest.pulls.listReviewComments({
+        owner,
+        repo,
+        pull_number: prNumber,
+    })).data;
+    const numberOfComments = comments.length + reviewComments.length;
+    if (numberOfComments < args.threshold) {
+        return null;
+    }
+    const users1 = comments
+        .map((comment) => comment.user)
+        .filter((user) => user !== null);
+    const users2 = reviewComments
+        .map((comment) => comment.user)
+        .filter((user) => user !== null);
+    const logins = (0, getLoginNames_1.getLoginNames)(users1.concat(users2));
+    return {
+        logins,
+        numberOfComments,
+        threshold: args.threshold,
+    };
+}
+exports.getCommentContent = getCommentContent;
+
+
+/***/ }),
+
+/***/ 40:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getLoginNames = void 0;
+function uniqueStringArray(texts) {
+    if (texts.length === 0)
+        return [];
+    const sorted = texts.sort();
+    const result = [sorted[0]];
+    for (let i = 0; i < sorted.length - 1; i++) {
+        if (sorted[i + 1] !== sorted[i]) {
+            result.push(sorted[i + 1]);
+        }
+    }
+    return result;
+}
+function getLoginNames(users) {
+    const loginNameArray = users
+        .filter((user) => user.type === 'User')
+        .map((user) => user.login);
+    return uniqueStringArray(loginNameArray);
+}
+exports.getLoginNames = getLoginNames;
+
+
+/***/ }),
+
+/***/ 8484:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.isAlreadyCommented = void 0;
+const constants_1 = __nccwpck_require__(1435);
+function isAlreadyCommented(comments) {
+    return comments.some((comment) => comment.body?.startsWith(constants_1.ACTION_IDENTIFY_TEXT));
+}
+exports.isAlreadyCommented = isAlreadyCommented;
+
+
+/***/ }),
+
+/***/ 7942:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.postComment = void 0;
+const constants_1 = __nccwpck_require__(1435);
+function MainText(content) {
+    return `
+Hey ${content.logins.map((login) => '@' + login).join(', ')}!
+
+It seems the discussion is dragging on. Perhaps instead of text communication, you could try having a conversation via face-to-face or video call, or even try mob programming?
+`;
+}
+function debugText(content) {
+    return `
+<details>
+<summary>number of comments</summary>
+the number of the comments is ${content.numberOfComments}
+threshold: ${content.threshold}
+</details>
+`;
+}
+function getText(content) {
+    return `${constants_1.ACTION_IDENTIFY_TEXT}
+
+${MainText(content)}
+
+${debugText(content)}
+`;
+}
+async function postComment(octokit, octokitContext, content) {
+    const { owner, repo, prNumber } = octokitContext;
+    await octokit.rest.issues.createComment({
+        owner,
+        repo,
+        issue_number: prNumber,
+        body: getText(content),
+    });
+}
+exports.postComment = postComment;
+
+
+/***/ }),
+
 /***/ 9356:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -29009,18 +29159,8 @@ exports.run = void 0;
 const core = __importStar(__nccwpck_require__(9093));
 const github_1 = __nccwpck_require__(5942);
 const option_1 = __nccwpck_require__(6335);
-const uniqueStringArray = (texts) => {
-    if (texts.length === 0)
-        return [];
-    const sorted = texts.sort();
-    const result = [sorted[0]];
-    for (let i = 0; i < sorted.length - 1; i++) {
-        if (sorted[i + 1] !== sorted[i]) {
-            result.push(sorted[i + 1]);
-        }
-    }
-    return result;
-};
+const getCommentContent_1 = __nccwpck_require__(4069);
+const postComment_1 = __nccwpck_require__(7942);
 /**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
@@ -29031,42 +29171,18 @@ async function run() {
         const octokit = (0, github_1.getOctokit)(token);
         const owner = github_1.context.repo.owner;
         const repo = github_1.context.repo.repo;
+        const octokitContext = {
+            owner: github_1.context.repo.owner,
+            repo: github_1.context.repo.repo,
+            prNumber,
+        };
         core.debug(`owner: ${owner}, repo: ${repo}, PR #${prNumber}`);
-        const comments = (await octokit.rest.issues.listComments({
-            owner,
-            repo,
-            issue_number: prNumber,
-        })).data.filter((c) => c.user?.type !== 'Bot');
-        const reviewComments = (await octokit.rest.pulls.listReviewComments({
-            owner,
-            repo,
-            pull_number: prNumber,
-        })).data.filter((c) => c.user.type !== 'Bot');
-        const hasMessageSent = comments.some((comment) => comment.body?.includes('It seems the discussion is dragging on.'));
-        const commentCount = comments.length + reviewComments.length;
-        if (commentCount < threshold) {
-            return;
-        }
-        if (hasMessageSent) {
-            core.debug('a message has been sent');
-            return;
-        }
-        const userLogins = uniqueStringArray(comments
-            .map((comment) => comment.user?.login)
-            .concat(reviewComments.map((comment) => comment.user.login))
-            .filter((comment) => !!comment)).map((login) => `@${login}`);
-        await octokit.rest.issues.createComment({
-            owner,
-            repo,
-            issue_number: prNumber,
-            body: `Hey ${userLogins.join(', ')}!
-
-It seems the discussion is dragging on. Perhaps instead of text communication, you could try having a conversation via face-to-face or video call, or even try mob programming?
-
-the number of the comments is ${comments.length} and the review comments is ${reviewComments.length}
-threshold: ${threshold}, commentCount: ${commentCount}`,
+        const commentContent = await (0, getCommentContent_1.getCommentContent)(octokit, octokitContext, {
+            threshold,
         });
-        core.debug(`Commented on PR #${prNumber}`);
+        if (commentContent) {
+            await (0, postComment_1.postComment)(octokit, octokitContext, commentContent);
+        }
     }
     catch (error) {
         // Fail the workflow run if an error occurs
