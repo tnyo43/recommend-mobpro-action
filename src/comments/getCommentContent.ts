@@ -1,20 +1,22 @@
-import { type Octokit } from 'octokit'
-import { CommentContent, type User } from './types'
+import {
+  type CommentContent,
+  type Octokit,
+  type OctokitContext,
+  type User
+} from './types'
 import { getLoginNames } from './getLoginNames'
 import { isAlreadyCommented } from './isAlreadyCommented'
 
 type Args = {
-  owner: string
-  repo: string
-  prNumber: number
   threshold: number
 }
 
 export async function getCommentContent(
   octokit: Octokit,
+  octokitContext: OctokitContext,
   args: Args
 ): Promise<CommentContent | null> {
-  const { owner, repo, prNumber } = args
+  const { owner, repo, prNumber } = octokitContext
 
   const comments = (
     await octokit.rest.issues.listComments({

@@ -1,3 +1,13 @@
+import { getOctokit } from '@actions/github'
+
+export type Octokit = ReturnType<typeof getOctokit>
+
+export type OctokitContext = {
+  owner: string
+  repo: string
+  prNumber: number
+}
+
 export type User = {
   // login id of user: ex. tnyo43
   login: string

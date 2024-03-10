@@ -1,21 +1,9 @@
 import * as core from '@actions/core'
 import { getOctokit, context } from '@actions/github'
 import { getOption } from './option'
-
-const uniqueStringArray = (texts: string[]): string[] => {
-  if (texts.length === 0) return []
-
-  const sorted = texts.sort()
-  const result = [sorted[0]]
-
-  for (let i = 0; i < sorted.length - 1; i++) {
-    if (sorted[i + 1] !== sorted[i]) {
-      result.push(sorted[i + 1])
-    }
-  }
-
-  return result
-}
+import { getCommentContent } from './comments/getCommentContent'
+import { OctokitContext } from './comments/types'
+import { postComment } from './comments/postComment'
 
 /**
  * The main function for the action.
@@ -28,56 +16,21 @@ export async function run(): Promise<void> {
     const octokit = getOctokit(token)
     const owner = context.repo.owner
     const repo = context.repo.repo
+    const octokitContext: OctokitContext = {
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      prNumber
+    }
 
     core.debug(`owner: ${owner}, repo: ${repo}, PR #${prNumber}`)
 
-    const comments = (
-      await octokit.rest.issues.listComments({
-        owner,
-        repo,
-        issue_number: prNumber
-      })
-    ).data.filter(c => c.user?.type !== 'Bot')
-
-    const reviewComments = (
-      await octokit.rest.pulls.listReviewComments({
-        owner,
-        repo,
-        pull_number: prNumber
-      })
-    ).data.filter(c => c.user.type !== 'Bot')
-
-    const hasMessageSent = comments.some(comment =>
-      comment.body?.includes('It seems the discussion is dragging on.')
-    )
-    const commentCount = comments.length + reviewComments.length
-    if (commentCount < threshold) {
-      return
-    }
-    if (hasMessageSent) {
-      core.debug('a message has been sent')
-      return
-    }
-
-    const userLogins = uniqueStringArray(
-      comments
-        .map(comment => comment.user?.login)
-        .concat(reviewComments.map(comment => comment.user.login))
-        .filter((comment): comment is string => !!comment)
-    ).map(login => `@${login}`)
-
-    await octokit.rest.issues.createComment({
-      owner,
-      repo,
-      issue_number: prNumber,
-      body: `Hey ${userLogins.join(', ')}!
-
-It seems the discussion is dragging on. Perhaps instead of text communication, you could try having a conversation via face-to-face or video call, or even try mob programming?
-
-the number of the comments is ${comments.length} and the review comments is ${reviewComments.length}
-threshold: ${threshold}, commentCount: ${commentCount}`
+    const commentContent = await getCommentContent(octokit, octokitContext, {
+      threshold
     })
-    core.debug(`Commented on PR #${prNumber}`)
+
+    if (commentContent) {
+      await postComment(octokit, octokitContext, commentContent)
+    }
   } catch (error) {
     // Fail the workflow run if an error occurs
     if (error instanceof Error) core.setFailed(error.message)
