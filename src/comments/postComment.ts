@@ -1,5 +1,5 @@
 import { ACTION_IDENTIFY_TEXT } from './constants'
-import { CommentContent } from './types'
+import { type CommentContent, type Octokit, type OctokitContext } from './types'
 
 function MainText(content: CommentContent) {
   return `
@@ -18,11 +18,26 @@ threshold: ${content.threshold}
 `
 }
 
-export async function postComment(content: CommentContent) {
-  const rawMessage = `${ACTION_IDENTIFY_TEXT}
+function getText(content: CommentContent) {
+  return `${ACTION_IDENTIFY_TEXT}
 
 ${MainText(content)}
 
 ${debugText(content)}
 `
+}
+
+export async function postComment(
+  octokit: Octokit,
+  octokitContext: OctokitContext,
+  content: CommentContent
+) {
+  const { owner, repo, prNumber } = octokitContext
+
+  await octokit.rest.issues.createComment({
+    owner,
+    repo,
+    issue_number: prNumber,
+    body: getText(content)
+  })
 }
