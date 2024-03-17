@@ -28,7 +28,3 @@ jobs:
         uses: ./
         with:
           threshold: 4
-
-      - name: Print Output
-        id: output
-        run: echo "${{ steps.test-action.outputs.time }}"
