@@ -1,6 +1,6 @@
-name: 'The name of your action here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'recommend-mobpro-action'
+description: 'recommend to do mob programming when a discussion drags on'
+author: 'Tomoya KASHIFUKU<tnyo43@gmail.com>'
 
 inputs:
   github_token:
