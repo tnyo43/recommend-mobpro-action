@@ -1,13 +1,7 @@
-name: 'The name of your action here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'recommend-mobpro-action'
+description: 'recommend to do mob programming when a discussion drags on'
+author: 'Tomoya KASHIFUKU<tnyo43@gmail.com>'
 
-# Add your action's branding here. This will appear on the GitHub Marketplace.
-branding:
-  icon: 'heart'
-  color: 'red'
-
-# Define your inputs here.
 inputs:
   github_token:
     description: 'a github access token'
@@ -25,11 +19,6 @@ inputs:
       exceeds this'
     required: true
     default: 25
-
-# Define your outputs here.
-outputs:
-  time:
-    description: 'Your output description here'
 
 runs:
   using: node20
