@@ -19,7 +19,9 @@ inputs:
 
 runs:
   using: 'composite'
+  if: github.event_name != 'issue_comment' || github.event.issue.pull_request
   steps:
+    - uses: actions/checkout@v4
     - uses: actions/setup-node@v3
       with:
         node-version-file: '.node-version'
