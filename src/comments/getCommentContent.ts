@@ -5,7 +5,7 @@ import {
   type User,
 } from './types';
 import { getLoginNames } from './getLoginNames';
-import { isAlreadyCommented } from './isAlreadyCommented';
+import { getExistingCommentUrl } from './getExistingCommentUrl';
 
 export async function getCommentContent(
   octokit: Octokit,
@@ -25,7 +25,12 @@ export async function getCommentContent(
     })
   ).data;
 
-  if (isAlreadyCommented(comments, option)) {
+  const existingCommentUrl = getExistingCommentUrl(comments);
+  if (!existingCommentUrl) {
+    console.log(
+      'a recommending comment has already been posted: ',
+      existingCommentUrl,
+    );
     return null;
   }
 

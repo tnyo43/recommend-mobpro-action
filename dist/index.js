@@ -28996,7 +28996,7 @@ exports.ACTION_IDENTIFY_TEXT = '<!-- a sentence for identifying bot recommend-mo
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getCommentContent = void 0;
 const getLoginNames_1 = __nccwpck_require__(40);
-const isAlreadyCommented_1 = __nccwpck_require__(8484);
+const getExistingCommentUrl_1 = __nccwpck_require__(8231);
 async function getCommentContent(octokit, octokitContext, threshold, option) {
     const { owner, repo, prNumber } = octokitContext;
     const comments = (await octokit.rest.issues.listComments({
@@ -29004,8 +29004,9 @@ async function getCommentContent(octokit, octokitContext, threshold, option) {
         repo,
         issue_number: prNumber,
     })).data;
-    if ((0, isAlreadyCommented_1.isAlreadyCommented)(comments, option)) {
-        return null;
+    const existingCommentUrl = (0, getExistingCommentUrl_1.getExistingCommentUrl)(comments);
+    if (!existingCommentUrl) {
+        console.log('a recommending comment has already been posted: ', existingCommentUrl);
     }
     const reviewComments = (await octokit.rest.pulls.listReviewComments({
         owner,
@@ -29030,6 +29031,23 @@ async function getCommentContent(octokit, octokitContext, threshold, option) {
     };
 }
 exports.getCommentContent = getCommentContent;
+
+
+/***/ }),
+
+/***/ 8231:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getExistingCommentUrl = void 0;
+const constants_1 = __nccwpck_require__(1435);
+function getExistingCommentUrl(comments) {
+    const comment = comments.find((comment) => comment.body?.startsWith(constants_1.ACTION_IDENTIFY_TEXT));
+    return comment?.html_url;
+}
+exports.getExistingCommentUrl = getExistingCommentUrl;
 
 
 /***/ }),
@@ -29060,26 +29078,6 @@ function getLoginNames(users) {
     return uniqueStringArray(loginNameArray);
 }
 exports.getLoginNames = getLoginNames;
-
-
-/***/ }),
-
-/***/ 8484:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isAlreadyCommented = void 0;
-const constants_1 = __nccwpck_require__(1435);
-function isAlreadyCommented(comments, option) {
-    const comment = comments.find((comment) => comment.body?.startsWith(constants_1.ACTION_IDENTIFY_TEXT));
-    if (option.debug) {
-        console.log('a recommending comment has already been posted', comment);
-    }
-    return !!comment;
-}
-exports.isAlreadyCommented = isAlreadyCommented;
 
 
 /***/ }),
