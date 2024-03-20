@@ -13,6 +13,9 @@ inputs:
       exceeds this'
     required: true
     default: 25
+  debug:
+    description: show debug message (for development)
+    required: false
 
 runs:
   using: node20

@@ -2,6 +2,7 @@ import { getInput, setFailed } from '@actions/core';
 import { context } from '@actions/github';
 
 type Option = {
+  debug: boolean;
   token: string;
   prNumber: number;
   threshold: number;
@@ -26,9 +27,19 @@ export function getOption(): Option {
 
   const threshold = Number(getInput('threshold', { required: true }));
 
-  return {
+  const debug = getInput('debug', { required: false }) === 'true';
+
+  const option = {
     token,
     prNumber,
     threshold,
+    debug,
   };
+
+  if (debug) {
+    console.log('******* DEBUG is ENABLED *******');
+    console.log('option', option);
+  }
+
+  return option;
 }
