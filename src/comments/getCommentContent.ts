@@ -11,9 +11,6 @@ export async function getCommentContent(
   octokit: Octokit,
   octokitContext: OctokitContext,
   threshold: number,
-  option: {
-    debug: boolean;
-  },
 ): Promise<CommentContent | null> {
   const { owner, repo, prNumber } = octokitContext;
 
@@ -43,7 +40,10 @@ export async function getCommentContent(
   ).data;
 
   const numberOfComments = comments.length + reviewComments.length;
+  console.log('number of the obtained comments is ', numberOfComments);
+
   if (numberOfComments < threshold) {
+    console.log("It's not necessary to send a recommending comment yet.");
     return null;
   }
 
