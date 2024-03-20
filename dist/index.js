@@ -29205,18 +29205,16 @@ exports.getOption = void 0;
 const core_1 = __nccwpck_require__(9093);
 const github_1 = __nccwpck_require__(5942);
 function getPrNumber() {
-    if (typeof github_1.context.payload.pull_request?.number === 'number') {
-        return github_1.context.payload.pull_request.number;
-    }
-    const url = (0, core_1.getInput)('pr_url', { required: false });
-    const numberFromUrl = Number(url.substring(url.lastIndexOf('/') + 1));
-    return numberFromUrl;
+    return (github_1.context.payload.issue?.number ||
+        github_1.context.payload.pull_request?.number ||
+        // expect to either issue.number or pull_request.number be non-undefined, so it wouldn't be NaN
+        NaN);
 }
 function getOption() {
     const token = (0, core_1.getInput)('github_token', { required: true });
     const prNumber = getPrNumber();
-    if (isNaN(prNumber) || prNumber === 0) {
-        (0, core_1.setFailed)('pr number is not set properly');
+    if (isNaN(prNumber)) {
+        (0, core_1.setFailed)('fail to get pr number');
     }
     const threshold = Number((0, core_1.getInput)('threshold', { required: true }));
     return {
