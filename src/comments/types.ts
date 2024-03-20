@@ -24,7 +24,4 @@ export type Comment = {
 
 export type CommentContent = {
   logins: string[];
-
-  numberOfComments: number;
-  threshold: number;
 };

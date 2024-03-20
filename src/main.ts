@@ -10,7 +10,7 @@ import { postComment } from './comments/postComment';
  */
 export async function run(): Promise<void> {
   try {
-    const { token, prNumber, threshold, debug } = getOption();
+    const { token, prNumber, threshold } = getOption();
 
     const octokit = getOctokit(token);
     const octokitContext: OctokitContext = {
@@ -23,7 +23,6 @@ export async function run(): Promise<void> {
       octokit,
       octokitContext,
       threshold,
-      { debug },
     );
 
     if (commentContent) {

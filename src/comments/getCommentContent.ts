@@ -58,7 +58,5 @@ export async function getCommentContent(
 
   return {
     logins,
-    numberOfComments,
-    threshold,
   };
 }
