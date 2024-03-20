@@ -28,4 +28,3 @@ jobs:
         uses: ./
         with:
           threshold: 4
-          debug: true
