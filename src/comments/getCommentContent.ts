@@ -23,7 +23,7 @@ export async function getCommentContent(
   ).data;
 
   const existingCommentUrl = getExistingCommentUrl(comments);
-  if (!existingCommentUrl) {
+  if (existingCommentUrl) {
     console.log(
       'a recommending comment has already been posted: ',
       existingCommentUrl,

@@ -29005,7 +29005,7 @@ async function getCommentContent(octokit, octokitContext, threshold) {
         issue_number: prNumber,
     })).data;
     const existingCommentUrl = (0, getExistingCommentUrl_1.getExistingCommentUrl)(comments);
-    if (!existingCommentUrl) {
+    if (existingCommentUrl) {
         console.log('a recommending comment has already been posted: ', existingCommentUrl);
         return null;
     }
