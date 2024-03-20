@@ -29225,6 +29225,7 @@ function getOption() {
         debug,
     };
     if (debug) {
+        console.log('******* DEBUG is ENABLED *******');
         console.log('option', option);
     }
     return option;

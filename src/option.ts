@@ -37,6 +37,7 @@ export function getOption(): Option {
   };
 
   if (debug) {
+    console.log('******* DEBUG is ENABLED *******');
     console.log('option', option);
   }
 
