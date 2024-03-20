@@ -7,12 +7,6 @@ inputs:
     description: 'a github access token'
     required: true
     default: ${{ github.token }}
-  pr_url:
-    description:
-      'the target pr url. This is used for taking pr number in workflows
-      triggered by "issue_comment" event'
-    required: true
-    default: ${{ github.event.issue.pull_request.url }}
   threshold:
     description:
       'a threshold at which a message is sent when the number of comments
