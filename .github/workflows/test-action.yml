@@ -18,6 +18,7 @@ jobs:
     permissions:
       pull-requests: write
     steps:
+      - uses: actions/checkout@v4
       - name: Test Local Action
         id: test-action
         uses: ./
