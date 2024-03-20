@@ -28997,14 +28997,14 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getCommentContent = void 0;
 const getLoginNames_1 = __nccwpck_require__(40);
 const isAlreadyCommented_1 = __nccwpck_require__(8484);
-async function getCommentContent(octokit, octokitContext, args) {
+async function getCommentContent(octokit, octokitContext, threshold, option) {
     const { owner, repo, prNumber } = octokitContext;
     const comments = (await octokit.rest.issues.listComments({
         owner,
         repo,
         issue_number: prNumber,
     })).data;
-    if ((0, isAlreadyCommented_1.isAlreadyCommented)(comments)) {
+    if ((0, isAlreadyCommented_1.isAlreadyCommented)(comments, option)) {
         return null;
     }
     const reviewComments = (await octokit.rest.pulls.listReviewComments({
@@ -29013,7 +29013,7 @@ async function getCommentContent(octokit, octokitContext, args) {
         pull_number: prNumber,
     })).data;
     const numberOfComments = comments.length + reviewComments.length;
-    if (numberOfComments < args.threshold) {
+    if (numberOfComments < threshold) {
         return null;
     }
     const users1 = comments
@@ -29026,7 +29026,7 @@ async function getCommentContent(octokit, octokitContext, args) {
     return {
         logins,
         numberOfComments,
-        threshold: args.threshold,
+        threshold,
     };
 }
 exports.getCommentContent = getCommentContent;
@@ -29072,8 +29072,12 @@ exports.getLoginNames = getLoginNames;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.isAlreadyCommented = void 0;
 const constants_1 = __nccwpck_require__(1435);
-function isAlreadyCommented(comments) {
-    return comments.some((comment) => comment.body?.startsWith(constants_1.ACTION_IDENTIFY_TEXT));
+function isAlreadyCommented(comments, option) {
+    const comment = comments.find((comment) => comment.body?.startsWith(constants_1.ACTION_IDENTIFY_TEXT));
+    if (option.debug) {
+        console.log('a recommending comment has already been posted', comment);
+    }
+    return !!comment;
 }
 exports.isAlreadyCommented = isAlreadyCommented;
 
@@ -29167,19 +29171,14 @@ const postComment_1 = __nccwpck_require__(7942);
  */
 async function run() {
     try {
-        const { token, prNumber, threshold } = (0, option_1.getOption)();
+        const { token, prNumber, threshold, debug } = (0, option_1.getOption)();
         const octokit = (0, github_1.getOctokit)(token);
-        const owner = github_1.context.repo.owner;
-        const repo = github_1.context.repo.repo;
         const octokitContext = {
             owner: github_1.context.repo.owner,
             repo: github_1.context.repo.repo,
             prNumber,
         };
-        core.debug(`owner: ${owner}, repo: ${repo}, PR #${prNumber}`);
-        const commentContent = await (0, getCommentContent_1.getCommentContent)(octokit, octokitContext, {
-            threshold,
-        });
+        const commentContent = await (0, getCommentContent_1.getCommentContent)(octokit, octokitContext, threshold, { debug });
         if (commentContent) {
             await (0, postComment_1.postComment)(octokit, octokitContext, commentContent);
         }
