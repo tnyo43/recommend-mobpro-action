@@ -1,3 +1,4 @@
+import { setFailed } from '@actions/core';
 import { ACTION_IDENTIFY_TEXT } from './constants';
 import {
   type CommentContent,
@@ -27,10 +28,20 @@ export async function postComment(
 ) {
   const { owner, repo, prNumber } = octokitContext;
 
-  await octokit.rest.issues.createComment({
-    owner,
-    repo,
-    issue_number: prNumber,
-    body: getText(content),
-  });
+  try {
+    const result = await octokit.rest.issues.createComment({
+      owner,
+      repo,
+      issue_number: prNumber,
+      body: getText(content),
+    });
+
+    console.log(
+      'a recommending comment has been posted: ',
+      result.data.html_url,
+    );
+  } catch (error) {
+    console.error(error);
+    setFailed('failed to post comment');
+  }
 }
