@@ -25,3 +25,7 @@ runs:
         node-version: 20
     - run: 'node ${GITHUB_ACTION_PATH}/dist/index.js'
       shell: bash
+      env:
+        INPUT_GITHUB_TOKEN: ${{ inputs.github_token }}
+        INPUT_THRESHOLD: ${{ inputs.threshold }}
+        INPUT_DEBUG: ${{ inputs.debug }}
