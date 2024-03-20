@@ -5,16 +5,12 @@ import {
   type User,
 } from './types';
 import { getLoginNames } from './getLoginNames';
-import { isAlreadyCommented } from './isAlreadyCommented';
-
-type Args = {
-  threshold: number;
-};
+import { getExistingCommentUrl } from './getExistingCommentUrl';
 
 export async function getCommentContent(
   octokit: Octokit,
   octokitContext: OctokitContext,
-  args: Args,
+  threshold: number,
 ): Promise<CommentContent | null> {
   const { owner, repo, prNumber } = octokitContext;
 
@@ -26,7 +22,12 @@ export async function getCommentContent(
     })
   ).data;
 
-  if (isAlreadyCommented(comments)) {
+  const existingCommentUrl = getExistingCommentUrl(comments);
+  if (existingCommentUrl) {
+    console.log(
+      'a recommending comment has already been posted: ',
+      existingCommentUrl,
+    );
     return null;
   }
 
@@ -39,7 +40,10 @@ export async function getCommentContent(
   ).data;
 
   const numberOfComments = comments.length + reviewComments.length;
-  if (numberOfComments < args.threshold) {
+  console.log('number of the obtained comments is ', numberOfComments);
+
+  if (numberOfComments < threshold) {
+    console.log("It's not necessary to send a recommending comment yet.");
     return null;
   }
 
@@ -54,7 +58,5 @@ export async function getCommentContent(
 
   return {
     logins,
-    numberOfComments,
-    threshold: args.threshold,
   };
 }

@@ -28996,15 +28996,17 @@ exports.ACTION_IDENTIFY_TEXT = '<!-- a sentence for identifying bot recommend-mo
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getCommentContent = void 0;
 const getLoginNames_1 = __nccwpck_require__(40);
-const isAlreadyCommented_1 = __nccwpck_require__(8484);
-async function getCommentContent(octokit, octokitContext, args) {
+const getExistingCommentUrl_1 = __nccwpck_require__(8231);
+async function getCommentContent(octokit, octokitContext, threshold) {
     const { owner, repo, prNumber } = octokitContext;
     const comments = (await octokit.rest.issues.listComments({
         owner,
         repo,
         issue_number: prNumber,
     })).data;
-    if ((0, isAlreadyCommented_1.isAlreadyCommented)(comments)) {
+    const existingCommentUrl = (0, getExistingCommentUrl_1.getExistingCommentUrl)(comments);
+    if (existingCommentUrl) {
+        console.log('a recommending comment has already been posted: ', existingCommentUrl);
         return null;
     }
     const reviewComments = (await octokit.rest.pulls.listReviewComments({
@@ -29013,7 +29015,9 @@ async function getCommentContent(octokit, octokitContext, args) {
         pull_number: prNumber,
     })).data;
     const numberOfComments = comments.length + reviewComments.length;
-    if (numberOfComments < args.threshold) {
+    console.log('number of the obtained comments is ', numberOfComments);
+    if (numberOfComments < threshold) {
+        console.log("It's not necessary to send a recommending comment yet.");
         return null;
     }
     const users1 = comments
@@ -29025,11 +29029,26 @@ async function getCommentContent(octokit, octokitContext, args) {
     const logins = (0, getLoginNames_1.getLoginNames)(users1.concat(users2));
     return {
         logins,
-        numberOfComments,
-        threshold: args.threshold,
     };
 }
 exports.getCommentContent = getCommentContent;
+
+
+/***/ }),
+
+/***/ 8231:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getExistingCommentUrl = void 0;
+const constants_1 = __nccwpck_require__(1435);
+function getExistingCommentUrl(comments) {
+    const comment = comments.find((comment) => comment.body?.startsWith(constants_1.ACTION_IDENTIFY_TEXT));
+    return comment?.html_url;
+}
+exports.getExistingCommentUrl = getExistingCommentUrl;
 
 
 /***/ }),
@@ -29064,22 +29083,6 @@ exports.getLoginNames = getLoginNames;
 
 /***/ }),
 
-/***/ 8484:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isAlreadyCommented = void 0;
-const constants_1 = __nccwpck_require__(1435);
-function isAlreadyCommented(comments) {
-    return comments.some((comment) => comment.body?.startsWith(constants_1.ACTION_IDENTIFY_TEXT));
-}
-exports.isAlreadyCommented = isAlreadyCommented;
-
-
-/***/ }),
-
 /***/ 7942:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
@@ -29087,6 +29090,7 @@ exports.isAlreadyCommented = isAlreadyCommented;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.postComment = void 0;
+const core_1 = __nccwpck_require__(9093);
 const constants_1 = __nccwpck_require__(1435);
 function MainText(content) {
     return `
@@ -29095,31 +29099,27 @@ Hey ${content.logins.map((login) => '@' + login).join(', ')}!
 It seems the discussion is dragging on. Perhaps instead of text communication, you could try having a conversation via face-to-face or video call, or even try mob programming?
 `;
 }
-function debugText(content) {
-    return `
-<details>
-<summary>number of comments</summary>
-the number of the comments is ${content.numberOfComments}
-threshold: ${content.threshold}
-</details>
-`;
-}
 function getText(content) {
     return `${constants_1.ACTION_IDENTIFY_TEXT}
 
 ${MainText(content)}
-
-${debugText(content)}
 `;
 }
 async function postComment(octokit, octokitContext, content) {
     const { owner, repo, prNumber } = octokitContext;
-    await octokit.rest.issues.createComment({
-        owner,
-        repo,
-        issue_number: prNumber,
-        body: getText(content),
-    });
+    try {
+        const result = await octokit.rest.issues.createComment({
+            owner,
+            repo,
+            issue_number: prNumber,
+            body: getText(content),
+        });
+        console.log('a recommending comment has been posted: ', result.data.html_url);
+    }
+    catch (error) {
+        console.error(error);
+        (0, core_1.setFailed)('failed to post comment');
+    }
 }
 exports.postComment = postComment;
 
@@ -29169,17 +29169,12 @@ async function run() {
     try {
         const { token, prNumber, threshold } = (0, option_1.getOption)();
         const octokit = (0, github_1.getOctokit)(token);
-        const owner = github_1.context.repo.owner;
-        const repo = github_1.context.repo.repo;
         const octokitContext = {
             owner: github_1.context.repo.owner,
             repo: github_1.context.repo.repo,
             prNumber,
         };
-        core.debug(`owner: ${owner}, repo: ${repo}, PR #${prNumber}`);
-        const commentContent = await (0, getCommentContent_1.getCommentContent)(octokit, octokitContext, {
-            threshold,
-        });
+        const commentContent = await (0, getCommentContent_1.getCommentContent)(octokit, octokitContext, threshold);
         if (commentContent) {
             await (0, postComment_1.postComment)(octokit, octokitContext, commentContent);
         }

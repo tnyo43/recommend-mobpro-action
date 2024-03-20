@@ -13,19 +13,17 @@ export async function run(): Promise<void> {
     const { token, prNumber, threshold } = getOption();
 
     const octokit = getOctokit(token);
-    const owner = context.repo.owner;
-    const repo = context.repo.repo;
     const octokitContext: OctokitContext = {
       owner: context.repo.owner,
       repo: context.repo.repo,
       prNumber,
     };
 
-    core.debug(`owner: ${owner}, repo: ${repo}, PR #${prNumber}`);
-
-    const commentContent = await getCommentContent(octokit, octokitContext, {
+    const commentContent = await getCommentContent(
+      octokit,
+      octokitContext,
       threshold,
-    });
+    );
 
     if (commentContent) {
       await postComment(octokit, octokitContext, commentContent);

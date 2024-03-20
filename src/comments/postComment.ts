@@ -1,3 +1,4 @@
+import { setFailed } from '@actions/core';
 import { ACTION_IDENTIFY_TEXT } from './constants';
 import {
   type CommentContent,
@@ -12,22 +13,11 @@ Hey ${content.logins.map((login) => '@' + login).join(', ')}!
 It seems the discussion is dragging on. Perhaps instead of text communication, you could try having a conversation via face-to-face or video call, or even try mob programming?
 `;
 }
-function debugText(content: CommentContent) {
-  return `
-<details>
-<summary>number of comments</summary>
-the number of the comments is ${content.numberOfComments}
-threshold: ${content.threshold}
-</details>
-`;
-}
 
 function getText(content: CommentContent) {
   return `${ACTION_IDENTIFY_TEXT}
 
 ${MainText(content)}
-
-${debugText(content)}
 `;
 }
 
@@ -38,10 +28,20 @@ export async function postComment(
 ) {
   const { owner, repo, prNumber } = octokitContext;
 
-  await octokit.rest.issues.createComment({
-    owner,
-    repo,
-    issue_number: prNumber,
-    body: getText(content),
-  });
+  try {
+    const result = await octokit.rest.issues.createComment({
+      owner,
+      repo,
+      issue_number: prNumber,
+      body: getText(content),
+    });
+
+    console.log(
+      'a recommending comment has been posted: ',
+      result.data.html_url,
+    );
+  } catch (error) {
+    console.error(error);
+    setFailed('failed to post comment');
+  }
 }

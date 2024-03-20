@@ -19,11 +19,9 @@ export type User = {
 export type Comment = {
   user: User | null;
   body?: string;
+  html_url: string;
 };
 
 export type CommentContent = {
   logins: string[];
-
-  numberOfComments: number;
-  threshold: number;
 };
