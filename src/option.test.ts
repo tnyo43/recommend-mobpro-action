@@ -3,11 +3,15 @@ import { context } from '@actions/github';
 
 const mockedContext = jest.mocked(context);
 
+const OPTIONS = {
+  github_token: 'token:123',
+  threshold: 100,
+  debug: 'false',
+};
+
 jest.mock('@actions/core', () => ({
-  getInput: (name: string) => {
-    if (name === 'threshold') return '100';
-    return `value-${name}`;
-  },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  getInput: (name: string) => (OPTIONS as any)[name],
   setFailed: () => {
     throw new Error();
   },
@@ -26,9 +30,10 @@ describe('if the event is triggered by "pull_request_review_comment"', () => {
   test('return pr number from "context.payload.pull_request.number"', () => {
     const option = getOption();
     expect(option).toStrictEqual({
+      token: 'token:123',
       prNumber: 5,
       threshold: 100,
-      token: 'value-github_token',
+      debug: false,
     });
   });
 });
@@ -46,9 +51,10 @@ describe('if the event is triggered by "issue_comment"', () => {
   test('return pr number from "context.payload.issue.number"', () => {
     const option = getOption();
     expect(option).toStrictEqual({
+      token: 'token:123',
       prNumber: 5,
       threshold: 100,
-      token: 'value-github_token',
+      debug: false,
     });
   });
 });

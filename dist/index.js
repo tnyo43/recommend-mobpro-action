@@ -29217,11 +29217,17 @@ function getOption() {
         (0, core_1.setFailed)('fail to get pr number');
     }
     const threshold = Number((0, core_1.getInput)('threshold', { required: true }));
-    return {
+    const debug = (0, core_1.getInput)('debug', { required: false }) === 'true';
+    const option = {
         token,
         prNumber,
         threshold,
+        debug,
     };
+    if (debug) {
+        console.log('option', option);
+    }
+    return option;
 }
 exports.getOption = getOption;
 
