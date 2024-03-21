@@ -21,19 +21,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test-action:
-    name: GitHub Actions Test
+  recommend-mobpro:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
-    if: github.event_name != 'issue_comment' || github.event.issue.pull_request
     steps:
-      - name: Checkout
-        id: checkout
-        uses: actions/checkout@v4
-      - uses: tnyo43/recommend-mobpro-action
+      - uses: tnyo43/recommend-mobpro-action@v1
         with:
-          threshold: 4 # customize this value as you like
+          threshold: 15 # customize this value as you like
 ```
 
 ## options
@@ -41,4 +36,4 @@ jobs:
 ### threshold
 
 A threshold at which a message is sent when the number of comments exceeds this.
-The default value is `25`.
+(default: `25`)
